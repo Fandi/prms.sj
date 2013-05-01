@@ -10,7 +10,7 @@
 			count++
 		};
 
-		this.invoke = function () {
+		this.release = function () {
 			if (--count === 0)
 				func();
 		};
@@ -23,11 +23,14 @@
 
 		var self = this;
 		var callback = function (result) {
-			promises[self.id].state = DONE;
-			promises[self.id].value = result;
+			if (typeof promises === 'object' &&
+				promises[self.id] != null) {
+				promises[self.id].state = DONE;
+				promises[self.id].value = result;
 
-			while (promises[self.id].deferments.length > 0) {
-				promises[self.id].deferments.splice(0, 1)[0].invoke();
+				while (promises[self.id].deferments.length > 0) {
+					promises[self.id].deferments.splice(0, 1)[0].release();
+				}
 			}
 		};
 
@@ -78,6 +81,7 @@
 		return new Promise(arguments);
 	};
 
+	//
 	window.revoke = function revoke() {
 		for (var key in promises) {
 			delete promises[key];

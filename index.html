@@ -1,32 +1,42 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Test</title>
+	<meta charset="utf-8" />
 	<script type="text/javascript" src="prms.js"></script>
 	<script type="text/javascript">
-		function getFirstWord(cb) {
+		function getFirstWord(returns) {
 			// supposedly reads dictionary asynchronously
-			cb('It');
+			setTimeout(function () {
+				console.log('\'getFirstWord\' completed');
+				returns('It');
+			}, parseInt(Math.random() * 3000));
 		};
 
-		function getSecondWord(cb) {
+		function getSecondWord(returns) {
 			// supposedly reads another dictionary asynchronously
-			cb('Works!');
+			setTimeout(function () {
+				console.log('\'getSecondWord\' completed');
+				returns('Works');
+			}, parseInt(Math.random() * 2000));
 		};
 
 		window.addEventListener('load', function () {
 			var word1 = async(getFirstWord);
 			var word2 = async(getSecondWord);
 
-			async(function (cb) {
+			async(function (returns) {
+				var textContent = word1.value + ' ' + word2.value + '!';
 				var h1 = document.createElement('H1');
-				h1.appendChild(document.createTextNode(word1.value + ' ' + word2.value + ' Cihuy!'));
+				h1.appendChild(document.createTextNode(textContent));
 				document.body.appendChild(h1);
 
-				cb();
-			});
+				console.info(textContent);
+				returns();
+				console.warn('Beware of memory leaks though.');
+			}, word1, word2);
 
-			revoke();
+			console.info('Awaiting asynchronous processes…');
 		});
 	</script>
 </head>
