@@ -7,7 +7,7 @@
 		var count = 0;
 
 		this.signal = function () {
-			count++
+			count++;
 		};
 
 		this.release = function () {
@@ -28,9 +28,8 @@
 				promises[self.id].state = DONE;
 				promises[self.id].value = result;
 
-				while (promises[self.id].deferments.length > 0) {
+				while (promises[self.id].deferments.length > 0)
 					promises[self.id].deferments.splice(0, 1)[0].release();
-				}
 			}
 		};
 
@@ -56,7 +55,7 @@
 		if (args.length === 1)
 			args[0](callback);
 		else {
-			var isReady = true;
+			var isdone = true;
 			var deferment = new Deferment(function () {
 				args[0](callback);
 			});
@@ -66,13 +65,13 @@
 					throw new Error();
 
 				if (promises[args[i].id].state === LOADING) {
-					isReady = false;
+					isdone = false;
 					deferment.signal();
 					promises[args[i].id].deferments.push(deferment);
 				}
 			}
 
-			if (isReady)
+			if (isdone)
 				args[0](callback);
 		}
 	};
@@ -81,7 +80,6 @@
 		return new Promise(arguments);
 	};
 
-	//
 	window.revoke = function revoke() {
 		for (var key in promises) {
 			delete promises[key];
