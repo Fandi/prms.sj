@@ -4,27 +4,6 @@
 	<title>Test</title>
 	<script type="text/javascript" src="prms.js"></script>
 	<script type="text/javascript">
-		function test(callback, delay, value) {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', 'Delay.ashx?delay=' + delay + '&value=' + value, true);
-
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === XMLHttpRequest.DONE)
-					try {
-						callback(eval(xhr.responseText));
-					} catch (e) {
-						callback(xhr.responseText);
-					}
-			};
-
-			xhr.send();
-		};
-
-		function writeln(value) {
-			document.body.appendChild(document.createTextNode(value || ''));
-			document.body.appendChild(document.createElement('BR'));
-		};
-
 		function getFirstWord(cb) {
 			// supposedly reads dictionary asynchronously
 			cb('It');
