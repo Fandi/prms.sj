@@ -2,94 +2,8 @@
 <html>
 <head>
 	<title>Test</title>
+	<script type="text/javascript" src="prms.js"></script>
 	<script type="text/javascript">
-		(function () {
-			var LOADING = false;
-			var DONE = true;
-			var promises = {};
-
-			var Deferment = function (func) {
-				var count = 0;
-
-				this.signal = function () {
-					count++
-				};
-
-				this.invoke = function () {
-					if (--count === 0)
-						func();
-				};
-			};
-
-			var Promise = function (args) {
-				if (args.length === 0 ||
-					typeof args[0] !== 'function')
-					throw new Error();
-
-				var self = this;
-				var callback = function (result) {
-					promises[self.id].state = DONE;
-					promises[self.id].value = result;
-
-					while (promises[self.id].deferments.length > 0) {
-						promises[self.id].deferments.splice(0, 1)[0].invoke();
-					}
-				};
-
-				Object.defineProperties(self, {
-					'id': {
-						'value': Date.now().toString() + Math.random().toString(),
-						'enumerable': false
-					},
-					'value': {
-						'get': function () {
-							return (promises[self.id].value);
-						},
-						'enumerable': true
-					}
-				});
-
-				promises[self.id] = {
-					'state': LOADING,
-					'value': null,
-					'deferments': []
-				};
-
-				if (args.length === 1)
-					args[0](callback);
-				else {
-					var isReady = true;
-					var deferment = new Deferment(function () {
-						args[0](callback);
-					});
-
-					for (var i = 1; i < args.length; i++) {
-						if (args[i].constructor !== Promise)
-							throw new Error();
-
-						if (promises[args[i].id].state === LOADING) {
-							isReady = false;
-							deferment.signal();
-							promises[args[i].id].deferments.push(deferment);
-						}
-					}
-
-					if (isReady)
-						args[0](callback);
-				}
-			};
-
-			window.async = function async(func, promises_) {
-				return new Promise(arguments);
-			};
-
-			window.revoke = function revoke() {
-				for (var key in promises) {
-					delete promises[key];
-				}
-			};
-		})();
-
 		function test(callback, delay, value) {
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', 'Delay.ashx?delay=' + delay + '&value=' + value, true);
@@ -109,35 +23,29 @@
 		function writeln(value) {
 			document.body.appendChild(document.createTextNode(value || ''));
 			document.body.appendChild(document.createElement('BR'));
-		}
+		};
+
+		function getFirstWord(cb) {
+			// supposedly reads dictionary asynchronously
+			cb('It');
+		};
+
+		function getSecondWord(cb) {
+			// supposedly reads another dictionary asynchronously
+			cb('Works!');
+		};
 
 		window.addEventListener('load', function () {
-			var delay = 1000;
-			var value = 'Test';
+			var word1 = async(getFirstWord);
+			var word2 = async(getSecondWord);
 
-			var promise1 = async(function (callback) {
-				writeln('line 1');
-				test(callback, delay * 2, delay);
+			async(function (cb) {
+				var h1 = document.createElement('H1');
+				h1.appendChild(document.createTextNode(word1.value + ' ' + word2.value + ' Cihuy!'));
+				document.body.appendChild(h1);
+
+				cb();
 			});
-
-			async(function (callback) {
-				writeln('line 2');
-				callback(null);
-			}, promise1);
-
-			var promise2 = async(function (callback) {
-				writeln('line 3');
-				test(callback, delay, value);
-			});
-
-			async(function (callback) {
-				writeln('line 4');
-				writeln();
-				writeln('delay: ' + promise1.value + 'ms');
-				writeln('value: \'' + promise2.value + '\'');
-
-				callback();
-			}, promise1, promise2);
 
 			revoke();
 		});
