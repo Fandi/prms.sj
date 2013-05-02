@@ -1,7 +1,6 @@
 (function () {
-	var VOID = -1;
-	var LOADING = 0;
-	var DONE = 1;
+	var LOADING = false;
+	var DONE = true;
 	var promises = {};
 
 	var set = function (id, result) {
@@ -28,7 +27,7 @@
 			if (args[i].constructor !== Promise)
 				throw new Error();
 
-			if (promises[args[i].id].state === LOADING) {
+			if (promises[args[i].id].state !== DONE) {
 				isdone = false;
 				defermentStack.put();
 				promises[args[i].id].defermentStacks.push(defermentStack);
